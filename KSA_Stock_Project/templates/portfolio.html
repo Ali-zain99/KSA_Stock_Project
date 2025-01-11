@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    <style>
+        /* Add your CSS here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .summary {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .chart {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .chatbot-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .chatbot-icon:hover {
+            background-color: #0056b3;
+        }
+
+        .custom-btn {
+            background-color: #007bff;
+            color: white;
+            font-size: 18px;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-decoration: none; /* Remove underline */
+        }
+
+        .custom-btn i {
+            margin-right: 10px;
+        }
+
+        .custom-btn:hover {
+            background-color: #0056b3;
+            color: #fff;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .custom-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Welcome Message -->
+        <div class="summary">
+            <h1>Welcome, {{ user_name }}!</h1>
+            <p>Your portfolio's total value is <strong>SAR {{ total_value }}</strong>.</p>
+            <p>Available Balance: <strong>SAR {{ available_balance }}</strong></p>
+            
+            <!-- Trading View Button -->
+            <div class="text-center mt-4">
+                <a href="{{ url_for('tradingview') }}" class="btn custom-btn" role="button">
+                    <i class="fas fa-chart-line"></i> Go to TradingView
+                </a>
+            </div>      
+        </div>
+
+        <!-- Profit and Loss Chart -->
+        <div class="chart">
+            <h2>Profit and Loss</h2>
+            <canvas id="profitLossChart" width="400" height="200"></canvas>
+        </div>
+
+        <!-- Holdings Table -->
+        <h2>Your Holdings</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stock</th>
+                    <th>Shares</th>
+                    <th>Avg Price</th>
+                    <th>Current Price</th>
+                    <th>Share Proportion</th>
+                    <th>Return (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for holding in holdings %}
+                <tr>
+                    <td>{{ holding.stock_name }}</td>
+                    <td>{{ holding.shares }}</td>
+                    <td>{{ holding.avg_price }}</td>
+                    <td>{{ holding.current_price }}</td>
+                    <td>{{ holding.weight | round(2) }}</td>
+                    <td style="color: {{ 'green' if holding.return >= 0 else 'red' }};">
+                        {{ holding.return | round(2) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Chatbot Icon -->
+    <a href="{{ url_for('chatbot') }}" class="chatbot-icon" title="Chatbot">
+        💬
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('profitLossChart').getContext('2d');
+        const profitLossChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [{% for holding in holdings %}'{{ holding.stock_name }}', {% endfor %}],
+                datasets: [{
+                    label: 'Return (%)',
+                    data: [{% for holding in holdings %}{{ holding.return | round(2) }}, {% endfor %}],
+                    backgroundColor: [
+                        {% for holding in holdings %}
+                        '{{ 'green' if holding.return >= 0 else 'red' }}',
+                        {% endfor %}
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        }
+    );
+    </script>
+</body>
+
+</html>

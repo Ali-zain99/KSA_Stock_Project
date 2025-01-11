@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Chart</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #2c3e50, #34495e);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #chart-container {
+            width: 90%;
+            max-width: 1200px;
+            background: #1e2a36;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: #d1d4dc;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .stock-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #34495e;
+            color: #ecf0f1;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .stock-button:hover {
+            background: #2c3e50;
+            transform: translateY(-2px);
+        }
+
+        .stock-button.active {
+            background: #2980b9;
+            box-shadow: 0 0 10px rgba(41, 128, 185, 0.5);
+        }
+
+        .stock-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #bdc3c7;
+        }
+
+        .info-value {
+            font-size: 1.1em;
+            color: #ecf0f1;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .trade-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+        .buy-button {
+            background: #27ae60;
+            color: white;
+        }
+
+        .sell-button {
+            background: #c0392b;
+            color: white;
+        }
+
+        .stop-loss-button {
+            background: #f39c12;
+            color: white;
+        }
+
+        .trade-button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+            color: white;
+            text-decoration: none;
+        }
+
+        #chart {
+            height: 400px;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #volume-chart {
+            height: 150px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            font-size: 1.2em;
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chart-container">
+        <div class="title">Saudi Stock Market - Real-time Data</div>
+        
+        <div class="button-container">
+            <button class="stock-button active" data-symbol="2030.SR">SARCO</button>
+            <button class="stock-button" data-symbol="2222.SR">SAUDI ARAMCO</button>
+            <button class="stock-button" data-symbol="2380.SR">PETRO RABIGH</button>
+            <button class="stock-button" data-symbol="2381.SR">ARABIAN DRILLING</button>
+            <button class="stock-button" data-symbol="2382.SR">ADES</button>
+            <button class="stock-button" data-symbol="4030.SR">BAHRI</button>
+            <button class="stock-button" data-symbol="4200.SR">ALDREES</button>
+        </div>
+
+        <div class="stock-info">
+            <div class="info-item">
+                <span class="info-label">Symbol:</span>
+                <span class="info-value" id="current-symbol">2222.SR</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Current Price:</span>
+                <span class="info-value">SAR <span id="current-price">0.00</span></span>
+            </div>
+            <div class="action-buttons">
+                <a href="/buy_stock" class="trade-button buy-button" id="buyButton">Buy Stock</a>
+                <a href="/sell_stock" class="trade-button sell-button" id="sellButton">Sell Stock</a>
+                <a href="/stock_loss" class="trade-button stop-loss-button" id="stopLossButton">Set Stop Loss</a>
+            </div>
+        </div>
+
+        <div id="chart"></div>
+        <div id="volume-chart"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize charts
+        const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+            layout: {
+                backgroundColor: '#000000',
+                textColor: '#d1d4dc',
+            },
+            grid: {
+                vertLines: { color: '#2b2f38' },
+                horzLines: { color: '#2b2f38' },
+            },
+            crosshair: {
+                mode: LightweightCharts.CrosshairMode.Normal,
+            },
+            priceScale: {
+                borderColor: '#555661',
+            },
+            timeScale: {
+                borderColor: '#555661',
+                timeVisible: true,
+                secondsVisible: false,
+            },
+        });
+
+        const candleSeries = chart.addCandlestickSeries({
+            upColor: '#26a69a',
+            downColor: '#ef5350',
+            borderUpColor: '#26a69a',
+            borderDownColor: '#ef5350',
+            wickUpColor: '#26a69a',
+            wickDownColor: '#ef5350',
+        });
+
+        const volumeChart = LightweightCharts.createChart(document.getElementById('volume-chart'), {
+            layout: {
+                backgroundColor: '#000000',
+                textColor: '#d1d4dc',
+            },
+            grid: {
+                vertLines: { color: '#2b2f38' },
+                horzLines: { color: '#2b2f38' },
+            },
+            crosshair: {
+                mode: LightweightCharts.CrosshairMode.Normal,
+            },
+            priceScale: {
+                borderColor: '#555661',
+                scaleMargins: {
+                    top: 0.1,
+                    bottom: 0.2,
+                },
+            },
+            timeScale: {
+                visible: false,
+            },
+        });
+
+        const volumeSeries = volumeChart.addHistogramSeries({
+            color: '#26a69a',
+            priceFormat: {
+                type: 'volume',
+            },
+            priceScaleId: '',
+        });
+
+        // Handle stock selection and data
+        let currentSymbol = '2222.SR';
+        const buttons = document.querySelectorAll('.stock-button');
+        
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                buttons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                currentSymbol = button.dataset.symbol;
+                document.getElementById('current-symbol').textContent = currentSymbol;
+                updateTradeButtons();
+                fetchStockData();
+            });
+        });
+
+        function updateTradeButtons() {
+            const buyButton = document.getElementById('buyButton');
+            const sellButton = document.getElementById('sellButton');
+            const stopLossButton = document.getElementById('stopLossButton');
+
+            buyButton.href = `/buy_stock?stock_name=${currentSymbol}`;
+            sellButton.href = `/sell_stock?stock_name=${currentSymbol}`;
+            stopLossButton.href = `/stock_loss?stock_name=${currentSymbol}`;
+        }
+
+        async function fetchStockData() {
+            try {
+                const response = await fetch(`/api/stock_data?symbol=${currentSymbol}`);
+                const { historical, latest } = await response.json();
+
+                if (historical && historical.length) {
+                    const candlestickData = historical.map(dataPoint => ({
+                        time: Math.floor(new Date(dataPoint.timestamp).getTime() / 1000),
+                        open: dataPoint.open,
+                        high: dataPoint.high,
+                        low: dataPoint.low,
+                        close: dataPoint.close,
+                    }));
+
+                    const volumeData = historical.map(dataPoint => ({
+                        time: Math.floor(new Date(dataPoint.timestamp).getTime() / 1000),
+                        value: dataPoint.volume,
+                        color: dataPoint.close >= dataPoint.open ? '#26a69a' : '#ef5350',
+                    }));
+
+                    candleSeries.setData(candlestickData);
+                    volumeSeries.setData(volumeData);
+                }
+
+                if (latest) {
+                    document.getElementById('current-price').textContent = latest.close.toFixed(2);
+                }
+            } catch (error) {
+                console.error('Error fetching stock data:', error);
+                const stockInfo = document.querySelector('.stock-info');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = 'Error fetching stock data. Please try again later.';
+                stockInfo.appendChild(errorDiv);
+            }
+        }
+
+        // Initial setup
+        updateTradeButtons();
+        fetchStockData();
+        setInterval(fetchStockData, 1000);
+
+        // Handle window resize
+        function handleResize() {
+            const container = document.getElementById('chart-container');
+            const chartElement = document.getElementById('chart');
+            const volumeElement = document.getElementById('volume-chart');
+            
+            chart.applyOptions({
+                width: chartElement.clientWidth,
+                height: chartElement.clientHeight,
+            });
+            
+            volumeChart.applyOptions({
+                width: volumeElement.clientWidth,
+                height: volumeElement.clientHeight,
+            });
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Initial resize
+    </script>
+</body>
+</html>

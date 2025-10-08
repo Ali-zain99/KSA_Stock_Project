@@ -59,9 +59,11 @@ The system provides personalized stock insights, tracks user portfolios, and ena
 ## ⚙️ Setup Instructions
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/yourusername/ksa-stock-assistant.git
 cd ksa-stock-assistant
+
 2. Create Virtual Environment
 bash
 Copy code
